@@ -1,0 +1,10 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+accesos_inmuebles_administrador,Acceso a inmuebles,model_lot_inmueble,lotificacion_group_administrador,1,1,1,1
+accesos_mora_administrador,Acceso a mora,model_lot_mora,lotificacion_group_administrador,1,1,1,1
+accesos_cotizador_administrador,Acceso a cotizador,model_lot_cotizador,lotificacion_group_administrador,1,1,1,1
+accesos_cotizador_lines_administrador,Acceso a Lineas de cotizador,model_lot_cotizador_lines,lotificacion_group_administrador,1,1,1,1
+accesos_cotizador_enganche_lines_administrador,Acceso a Lineas de enganche cotizador,model_lot_cotizador_enganche_lines,lotificacion_group_administrador,1,1,1,1
+accesos_registra_pago_administrador,Acceso a Registro de Pagos,model_lot_registra_pago_wizard,lotificacion_group_administrador,1,1,1,1
+
+
+

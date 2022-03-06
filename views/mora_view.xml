@@ -1,0 +1,29 @@
+<?xml version="1.0" ?>
+
+<odoo>
+    <record id="mora_form_view" model="ir.ui.view">
+        <field name="name">mora.form.view</field>
+        <field name="model">lot.mora</field>
+        <field name="arch" type="xml">
+                <form string="Mora">
+                     <sheet>
+                        <group>
+                           <field name="fecha_de_vigencia" placeholder="Fecha de Migencia"></field>
+                            <field name="porcentaje_de_mora" placeholder="Porcentaje de mora"/>
+                        </group>
+                     </sheet>
+                </form>
+        </field>
+    </record>
+
+    <record id="mora_tree_view" model="ir.ui.view">
+        <field name="name">mora.tree.view</field>
+        <field name="model">lot.mora</field>
+        <field name="arch" type="xml">
+                <tree string="Mora">
+                        <field name="fecha_de_vigencia"/>
+                        <field name="porcentaje_de_mora"/>
+                </tree>
+        </field>
+    </record>
+</odoo>

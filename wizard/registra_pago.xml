@@ -1,0 +1,40 @@
+<?xml version="1.0" ?>
+
+<odoo>
+    <!--Vista formulario -->
+    <record id="registra_pago_form_view" model="ir.ui.view">
+        <field name="name">registra.pago.form.view</field>
+        <field name="model">lot.registra.pago.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Registra Pago">
+                <group>
+                    <group>
+                        <field name="tipo_pago"/>
+                        <field name="monto"/>
+                        <field name="fecha"/>
+                    </group>
+                    <group>
+                        <field name="boleta"/>
+                        <field name="journal_id" widget="selection" domain="[('type', 'in', ('bank', 'cash'))]"/>
+                        <field name="mora" attrs="{'invisible': [('tipo_pago', '=', '1')]}"/>
+                    </group>
+                </group>
+                <footer>
+                    <button string="Cancel" class="btn_secondary" special="cancel"/>
+                    <button name="action_pagar" type="object" string="Registrar Pago" class="oe_highlight"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+
+    <!--Accion-->
+    <record id="action_registra_pago" model="ir.actions.act_window">
+        <field name="name">Registra Pago</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">lot.registra.pago.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="registra_pago_form_view"/>
+        <field name="target">new</field>
+    </record>
+</odoo>

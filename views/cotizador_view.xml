@@ -1,0 +1,194 @@
+<?xml version="1.0" ?>
+
+<odoo>
+
+<!--    <record id="action_imprime_cotizacion" model="ir.actions.server">-->
+<!--        <field name="name">Imprime Cotizacion</field>-->
+<!--        <field name="type">ir.actions.server</field>-->
+<!--        <field name="model_id" ref="model_lot_cotizador"/>-->
+<!--        <field name="binding_model_id" ref="model_lot_cotizador"/>-->
+<!--        <field name="state">code</field>-->
+<!--        <field name="code">-->
+<!--            action = record.action_imprime_cotizacion()-->
+<!--        </field>-->
+<!--    </record>-->
+
+<!--    <record id="action_imprime_estado_cuenta" model="ir.actions.server">-->
+<!--        <field name="name">Imprime Estado de Cuenta</field>-->
+<!--        <field name="type">ir.actions.server</field>-->
+<!--        <field name="model_id" ref="model_lot_cotizador"/>-->
+<!--        <field name="binding_model_id" ref="model_lot_cotizador"/>-->
+<!--        <field name="state">code</field>-->
+<!--        <field name="code">-->
+<!--            action = record.action_imprime_estado_cuenta()-->
+<!--        </field>-->
+<!--    </record>-->
+
+    <record id="cotizador_form_view" model="ir.ui.view">
+        <field name="name">cotizador.form.view</field>
+        <field name="model">lot.cotizador</field>
+        <field name="arch" type="xml">
+            <form string="Cotizador">
+                <header>
+                    <field name="valor_pagado" attrs="{'invisible': True}"/>
+                    <field name="state" widget='statusbar' statusbar_visible="draft,published"/>
+                    <button name="action_genera_cuotas" type="object" string="Generar Cuotas" class="oe_highlight"
+                            confirm="Esto eliminara cuotas actuales, esta seguro?"
+                            attrs="{'invisible': ['|',['state', '=', 'published'],['state', '=', 'cancelled']]}"/>
+                    <button name="action_confirma_cuotas" type="object" string="Confirma Plan" class="oe_highlight"
+                            attrs="{'invisible': ['|',['state', '=', 'published'],['state', '=', 'cancelled']]}"/>
+                    <button name="action_reestablece_borrador" type="object" string="Restablecer a borrador"
+                            attrs="{'invisible': ['|',('state', '=', 'draft'), ('valor_pagado', '>', 0)]}"/>
+                    <button name="action_cancela" type="object" string="Cancela"
+                            confirm="Esta operacion cancelara todas los documentos relacionados y es irreversible, esta seguro?"
+                            attrs="{'invisible': ['|',('state', '=', 'published'),('state', '=', 'cancelled')]}"/>
+                    <button name="action_registrar_pago" type="object" string="Registrar Pago" class="oe_highlight"
+                            attrs="{'invisible': ['|',('state', '=', 'draft'),('state', '=', 'cancelled')]}"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <h1>
+                                <field name="name" placeholder="Cotizacion"/>
+                            </h1>
+                        </group>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="inmueble_id" placeholder="Inmueble"></field>
+                            <field name="cliente_id" placeholder="Cliente"></field>
+                            <field name="fecha_inicial" placeholder="Fecha inicial"></field>
+                            <field name="plazo" placeholder="Plazo"></field>
+                            <field name="tasa_de_interes" placeholder="Tasa de interes"></field>
+                        </group>
+                        <group>
+                            <field name="precio" placeholder="Precio"></field>
+                            <field name="enganche" placeholder="Enganche"></field>
+                            <field name="monto_financiar" placeholder="Monto a financiar"></field>
+                            <field name="state_payment" widget="badge" decoration-info="state_payment == 'Borrador'"
+                                                                       decoration-danger="state_payment == 'Pagos pendientes'"
+                                                                       decoration-success="state_payment == 'Completamente Pagado' or state_payment == 'Normal'"
+                                                                       decoration-muted="state_payment == 'Cancelado'"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Plan de pagos" name="plan_pagos">
+                            <field name="cotizador_lines" widget="section_and_note_many2many many2many_checkboxes" mode="tree,kanban">
+                                <tree string="Plan de pagos">
+                                    <field name="cuota" optional="show"/>
+                                    <field name="fecha" optional="show"/>
+                                    <field name="capital" optional="show"/>
+                                    <field name="intereses" optional="show"/>
+                                    <field name="cuota_total" optional="show"/>
+                                    <field name="valor_pagado" optional="show"
+                                           attrs="{'column_invisible': ['|',('parent.state', '=', 'draft'),('parent.state', '=', 'cancelled')]}"/>
+                                    <field name="boleta" optional="show"
+                                           attrs="{'column_invisible': ['|',('parent.state', '=', 'draft'),('parent.state', '=', 'cancelled')]}"/>
+                                    <field name="fecha_pago" optional="show"
+                                           attrs="{'column_invisible': ['|',('parent.state', '=', 'draft'),('parent.state', '=', 'cancelled')]}"/>
+                                    <field name="cargo_capital_id" optional="show"
+                                           attrs="{'column_invisible': ['|',('parent.state', '=', 'draft'),('parent.state', '=', 'cancelled')]}"/>
+                                    <field name="cargo_intereses_id" optional="show"
+                                           attrs="{'column_invisible': ['|',('parent.state', '=', 'draft'),('parent.state', '=', 'cancelled')]}"/>
+                                    <field name="cargo_mora_id" optional="show"
+                                           attrs="{'column_invisible': ['|',('parent.state', '=', 'draft'),('parent.state', '=', 'cancelled')]}"/>
+                                    <field name="recibo_id" optional="show"
+                                           attrs="{'column_invisible': ['|',('parent.state', '=', 'draft'),('parent.state', '=', 'cancelled')]}"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Pagos de Enganche" name="pagos_enganche">
+                            <field name="cotizador_enganche_lines" widget="section_and_note_many2many" mode="tree">
+                                <tree string="Pagos de Enganche">
+                                    <field name="fecha" optional="show"/>
+                                    <field name="valor_pagado" optional="show"/>
+                                    <field name="boleta" optional="show"/>
+                                    <field name="cargo_enganche_id" optional="show"/>
+                                    <field name="recibo_id" optional="show"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Resumen" name="resumen">
+                            <group string="Financiamiento">
+                                <field name="enganche" ></field>
+                                <field name="monto_financiar" ></field>
+                                <field name="suma_cuotas" ></field>
+                            </group>
+                            <group string="Montos pagados">
+                                <field name="enganche_pagado" ></field>
+                                <field name="valor_pagado" ></field>
+                            </group>
+
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="cotizador_tree_view" model="ir.ui.view">
+        <field name="name">cotizador.tree.view</field>
+        <field name="model">lot.cotizador</field>
+        <field name="arch" type="xml">
+            <tree string="Cotizador">
+                <field name="name"></field>
+                <field name="inmueble_id"></field>
+                <field name="cliente_id"></field>
+                <field name="fecha_inicial"></field>
+                <field name="plazo"></field>
+                <field name="tasa_de_interes"></field>
+                <field name="precio"></field>
+                <field name="enganche"></field>
+                <field name="monto_financiar"></field>
+                <field name="state" widget="badge" decoration-info="state == 'draft'"
+                                           decoration-success="state == 'published'"
+                                           decoration-muted="state == 'canceled'"/>
+                <field name="state_payment" widget="badge" decoration-info="state_payment == 'Borrador'"
+                                           decoration-danger="state_payment == 'Pagos pendientes'"
+                                           decoration-success="state_payment == 'Completamente Pagado'  or state_payment == 'Normal'"
+                                           decoration-muted="state_payment == 'Cancelado'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="cotizador_lines_tree_view" model="ir.ui.view">
+        <field name="name">cotizador.lines.tree.view</field>
+        <field name="model">lot.cotizador.lines</field>
+        <field name="arch" type="xml">
+            <tree string="Cotizador Lines">
+                <field name="cotizador_id"></field>
+                <field name="inmueble_name"></field>
+                <field name="fecha"></field>
+                <field name="fecha_pago"></field>
+                <field name="capital"></field>
+                <field name="intereses"></field>
+                <field name="cuota"></field>
+                <field name="cuota_total"></field>
+                <field name="valor_pagado"></field>
+                <field name="boleta"></field>
+                <field name="cargo_capital_id"></field>
+                <field name="cargo_intereses_id"></field>
+                <field name="cargo_mora_id"></field>
+                <field name="recibo_id"></field>
+            </tree>
+        </field>
+    </record>
+
+
+    <record id="cotizador_enganche_lines_tree_view" model="ir.ui.view">
+        <field name="name">cotizador.enganche.lines.tree.view</field>
+        <field name="model">lot.cotizador.enganche.lines</field>
+        <field name="arch" type="xml">
+            <tree string="Cotizador Pagos Enganche">
+                <field name="cotizador_id"></field>
+                <field name="fecha"></field>
+                <field name="valor_pagado"></field>
+                <field name="boleta"></field>
+                <field name="cargo_enganche_id"></field>
+                <field name="recibo_id"></field>
+            </tree>
+        </field>
+    </record>
+
+</odoo>

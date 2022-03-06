@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+
+    <record id="report_cotizaciones" model="ir.actions.report">
+        <field name="name">Cotizacion</field>
+        <field name="model">lot.cotizador</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">iit_lotificacion.report_cotizacion</field>
+        <field name="report_file">iit_lotificacion.report_cotizacion</field>
+        <field name="binding_model_id" ref="model_lot_cotizador"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="report_cotizaciones_xlsx" model="ir.actions.report">
+        <field name="name">Ficha de Cotizacion</field>
+        <field name="model">lot.cotizador</field>
+        <field name="report_type">xlsx</field>
+        <field name="report_name">iit_lotificacion.report_cotizacion_xlsx</field>
+        <field name="report_file">iit_lotificacion.report_cotizacion_xlsx</field>
+        <field name="binding_model_id" ref="model_lot_cotizador"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="report_estados_cuenta" model="ir.actions.report">
+        <field name="name">Estado de Cuenta</field>
+        <field name="model">lot.cotizador</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">iit_lotificacion.report_estado_cuenta</field>
+        <field name="report_file">iit_lotificacion.report_estado_cuenta</field>
+        <field name="binding_model_id" ref="model_lot_cotizador"/>
+        <field name="binding_type">report</field>
+    </record>
+
+</odoo>

@@ -1,0 +1,49 @@
+<?xml version="1.0" ?>
+
+<odoo>
+
+    <record id="inmueble_action" model="ir.actions.act_window">
+        <field name="name">Inmuebles</field>
+        <field name="res_model">lot.inmueble</field>
+        <field name="view_mode">tree,form,kanban</field>
+    </record>
+
+    <record id="mora_action" model="ir.actions.act_window">
+        <field name="name">Mora</field>
+        <field name="res_model">lot.mora</field>
+        <field name="view_mode">tree,form,kanban</field>
+    </record>
+
+     <record id="cotizador_action" model="ir.actions.act_window">
+        <field name="name">Cotizador</field>
+        <field name="res_model">lot.cotizador</field>
+        <field name="view_mode">tree,form,kanban</field>
+    </record>
+
+     <record id="pivote_cuotas_action" model="ir.actions.act_window">
+        <field name="name">Pivote_cuotas</field>
+        <field name="res_model">lot.cotizador.lines</field>
+        <field name="view_mode">tree,form,kanban</field>
+    </record>
+
+     <record id="pivote_pagos_enganche_action" model="ir.actions.act_window">
+        <field name="name">Pivote_pagos_enganche</field>
+        <field name="res_model">lot.cotizador.enganche.lines</field>
+        <field name="view_mode">tree,form,kanban</field>
+    </record>
+
+    <menuitem name="Lotificacion" id="lotificacion_menu"/>
+    <menuitem name="Inmuebles" id="inmueble_menu" parent="lotificacion_menu"/>
+    <menuitem name="Inmuebles" id="inmueble_opcion" parent="inmueble_menu" action="inmueble_action"/>
+    <menuitem name="Clientes" id="clientes_opcion" parent="inmueble_menu" action="account.res_partner_action_customer"/>
+    <menuitem name="Productos" id="productos_opcion" parent="inmueble_menu" action="account.product_product_action_sellable"/>
+    <menuitem name="Facturas y Cargos" id="facturas_cargos_opcion" parent="inmueble_menu" action="account.action_move_out_invoice_type"/>
+    <menuitem name="Pagos" id="pagos_opcion" parent="inmueble_menu" action="account.action_account_payments"/>
+    <menuitem name="Procesos" id="procesos_menu" parent="lotificacion_menu"/>
+    <menuitem name="Mora" id="mora_opcion" parent="procesos_menu" action="mora_action"/>
+    <menuitem name="Cotizador" id="cotizador_opcion" parent="procesos_menu" action="cotizador_action"/>
+    <menuitem name="Informes" id="informes_menu" parent="lotificacion_menu"/>
+    <menuitem name="Pivote Cuotas" id="pivote_cuotas_opcion" parent="informes_menu" action="pivote_cuotas_action"/>
+    <menuitem name="Pivote Pagos Enganche" id="pivote_pagos_enganche_opcion" parent="informes_menu" action="pivote_pagos_enganche_action"/>
+
+</odoo>

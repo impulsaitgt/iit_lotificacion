@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <template id="report_estado_cuenta">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="cotizacion">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <div class="row" id="hash_header">
+                            <div class="col-12">
+                                <h4>Cotizacion: <span t-field="cotizacion.name"/></h4>
+                                <h4>Cliente: <span t-field="cotizacion.cliente_id"/></h4>
+                                <h4>Inmueble: <span t-field="cotizacion.inmueble_id"/></h4>
+                                <h4>Precio: <span t-field="cotizacion.precio" t-options='{"widget": "float" , "precision" : 2}'/></h4>
+                                <h4>Enganche: <span t-field="cotizacion.enganche" t-options='{"widget": "float" , "precision" : 2}'/></h4>
+                                <h4>Monto a Financier: <span t-field="cotizacion.monto_financiar" t-options='{"widget": "float" , "precision" : 2}'/></h4>
+                                <h4>Tasa de Interes: <span t-field="cotizacion.tasa_de_interes" t-options='{"widget": "float" , "precision" : 2}'/>%</h4>
+                                <h4>Fecha de Generacion: <span t-field="cotizacion.fecha_generacion" t-options='{"widget": "date" }'/></h4>
+                            </div>
+                        </div>
+                        <br/>
+                        <h4>Pagos Enganche</h4>
+                        <br/>
+                        <div class="row">
+                            <div class="col-6" id="hash_data_consistency_table">
+                                <table class="table table-bordered" style="table-layout: fixed; ">
+                                    <thead style="display: table-header-group">
+                                        <tr>
+                                            <th class="text-center" style="width: 33%" scope="col">Fecha</th>
+                                            <th class="text-center" style="width: 33%" scope="col">Valor Pagado</th>
+                                            <th class="text-center" style="width: 33%" scope="col">Boleta</th>                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="cotizacion.cotizador_enganche_lines" t-as="linea">
+                                            <tr>
+                                                <td>
+                                                    <span t-field="linea.fecha"/>
+                                                </td>
+                                                <td class="text-right">
+                                                    <span t-field="linea.valor_pagado" t-options='{"widget": "float" , "precision" : 2}'/>
+                                                </td>
+                                                <td>
+                                                    <span t-field="linea.boleta"/>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                    <tfoot style="display: table-row-group">
+                                        <tr>
+                                            <td>
+                                                Totales
+                                            </td>
+                                            <td class="text-right">
+                                                <span t-field="cotizacion.enganche_pagado" t-options='{"widget": "float" , "precision" : 2}'/>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                        <br/>
+                        <h4>Financiamiento</h4>
+                        <br/>
+                        <div class="row">
+                            <div class="col-12" id="hash_data_consistency_table">
+                                <table class="table table-bordered" style="table-layout: fixed; height:150mm">
+                                    <thead style="display: table-header-group">
+                                        <tr>
+                                            <th class="text-center" style="width: 8%" scope="col" >Cuota</th>
+                                            <th class="text-center" style="width: 13%" scope="col">Fecha</th>
+                                            <th class="text-center" style="width: 13%" scope="col">Capital</th>
+                                            <th class="text-center" style="width: 13%" scope="col">Intereses</th>
+                                            <th class="text-center" style="width: 13%" scope="col">Cuota Total</th>
+                                            <th class="text-center" style="width: 13%" scope="col">Valor Pagado</th>
+                                            <th class="text-center" style="width: 16%" scope="col">Fecha de Pago</th>
+                                            <th class="text-center" style="width: 10%" scope="col">Boleta</th>                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="cotizacion.cotizador_lines" t-as="linea">
+                                            <tr>
+                                                <td class="text-center">
+                                                    <span t-field="linea.cuota"/>
+                                                </td>
+                                                <td>
+                                                    <span t-field="linea.fecha"/>
+                                                </td>
+                                                <td class="text-right">
+                                                    <span t-field="linea.capital" t-options='{"widget": "float" , "precision" : 2}'/>
+                                                </td>
+                                                <td class="text-right">
+                                                    <span t-field="linea.intereses" t-options='{"widget": "float" , "precision" : 2}'/>
+                                                </td>
+                                                <td class="text-right">
+                                                    <span t-field="linea.cuota_total" t-options='{"widget": "float" , "precision" : 2}'/>
+                                                </td>
+                                                <td class="text-right">
+                                                    <span t-field="linea.valor_pagado" t-options='{"widget": "float" , "precision" : 2}'/>
+                                                </td>
+                                                <td>
+                                                    <span t-field="linea.fecha_pago"/>
+                                                </td>
+                                                <td>
+                                                    <span t-field="linea.boleta"/>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                    <tfoot style="display: table-row-group">
+                                        <tr>
+                                            <td class="text-center">
+                                            </td>
+                                            <td>
+                                                Totales
+                                            </td>
+                                            <td class="text-right">
+                                                <span t-field="cotizacion.suma_capital" t-options='{"widget": "float" , "precision" : 2}'/>
+                                            </td>
+                                            <td class="text-right">
+                                                <span t-field="cotizacion.suma_intereses" t-options='{"widget": "float" , "precision" : 2}'/>
+                                            </td>
+                                            <td class="text-right">
+                                                <span t-field="cotizacion.suma_cuotas" t-options='{"widget": "float" , "precision" : 2}'/>
+                                            </td>
+                                            <td class="text-right">
+                                                <span t-field="cotizacion.valor_pagado" t-options='{"widget": "float" , "precision" : 2}'/>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>
