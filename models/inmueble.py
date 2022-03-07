@@ -16,6 +16,13 @@ class Inmueble(models.Model):
     lateral_derecho = fields.Float(string="Lateral (metros)", default=0)
     area = fields.Float(string="Area (metros²)", default=0)
     foto = fields.Binary(string="Foto")
+    finca = fields.Char(string="Finca")
+    folio = fields.Char(string="Folio")
+    libro = fields.Char(string="Libro")
+
+    _sql_constraints = [
+        ('referencia_unica', 'unique(name)', "Ese inmueble ya existe especifica otro nombre")
+    ]
 
     @api.onchange('precio_a_publico')
     def onchange_precio_a_publico(self):
