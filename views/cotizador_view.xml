@@ -171,7 +171,31 @@
                 <field name="cargo_intereses_id"></field>
                 <field name="cargo_mora_id"></field>
                 <field name="recibo_id"></field>
+                <field name="estado"></field>
             </tree>
+        </field>
+    </record>
+
+        <!-- vista busqueda -->
+    <record id="cotizador_lines_search_view" model="ir.ui.view">
+        <field name="name">cotizador.lines.search.view</field>
+        <field name="model">lot.cotizador.lines</field>
+        <field name="arch" type="xml">
+            <search>
+                <!-- busqueda rapida -->
+                <field name="cotizador_id" string="Cotizacion"/>
+                <field name="inmueble_name" string="Inmueble"/>
+                <!-- filtro rapido -->
+                <filter name="atrasados" string="Atrasado" domain="[('estado','=','Atrasado')]"/>
+                <filter name="Pagados" string="Pagados" domain="[('estado','=','Pagado')]"/>
+                <filter name="Pendientes" string="Pendientes" domain="[('estado','!=','Pagado')]"/>
+                <!-- agrupacion rapida -->
+                <group expand="0" string="Agrupar por" colspan="12" col="10">
+                    <filter name="cotizador" string="Cotizador" context="{'group_by':'cotizador_id'}" />
+                    <filter name="inmueble" string="Inmueble" context="{'group_by':'inmueble_name'}" />
+                </group>
+
+            </search>
         </field>
     </record>
 

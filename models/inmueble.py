@@ -7,7 +7,7 @@ class Inmueble(models.Model):
     direccion = fields.Char(string="Direccion")
     numero_de_escritura = fields.Char(string="Numero de escritura")
     precio_a_publico = fields.Float(string="Precio a publico",required=True, default=0)
-    precio_iva = fields.Float(string="Precio con IVA",required=True, readonly=True)
+    precio_iva = fields.Float(string="Precio con IVA", required=True)
     precio_minimo = fields.Float(string="Precio Minimo (Sin IVA)",required=True, default=0)
     reserva = fields.Float(string="Reserva",required=True, default=0)
     frente = fields.Float(string="Frente (metros)", default=0)
