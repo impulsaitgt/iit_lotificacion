@@ -174,8 +174,14 @@ class Cotizador(models.Model):
                 intereses = intereses + linea.intereses
                 cuotas = cuotas + linea.cuota_total
                 valor_pagado = valor_pagado + linea.valor_pagado
-                if (linea.fecha < date.today()) and (round(linea.cuota_total,2) > round(linea.valor_pagado, 2)):
-                    state_payment = "Pagos pendientes"
+                if (round(linea.cuota_total,2) > round(linea.valor_pagado, 2)):
+                    if (linea.fecha < date.today()):
+                        state_payment = "Pagos pendientes"
+                        linea.estado = "Atrasado"
+                    else:
+                        linea.estado = 'Normal'
+                else:
+                    linea.estado = 'Pagado'
             cotizador.suma_capital = capital
             cotizador.suma_intereses = intereses
             cotizador.suma_cuotas = cuotas
@@ -214,7 +220,7 @@ class CotizadorLines(models.Model):
     cargo_intereses_id = fields.Many2one(string="Factura Interes", comodel_name='account.move', readonly=True)
     cargo_mora_id = fields.Many2one(string="Factura Mora", comodel_name='account.move', readonly=True)
     recibo_id = fields.Many2one(string="Recibo de Pago", comodel_name='account.payment', readonly=True)
-
+    estado = fields.Char(string="Estado", readonly=True, default='Normal')
 
     def _cuota_total_(self):
         for linea in self:
