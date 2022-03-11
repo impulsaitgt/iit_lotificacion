@@ -65,6 +65,7 @@
                         <field name="folio"/>
                         <field name="libro"/>
                         <field name="precio_a_publico"/>
+                        <field name="precio_iva"/>
                         <field name="precio_minimo"/>
                         <field name="reserva"/>
                     </tree>
