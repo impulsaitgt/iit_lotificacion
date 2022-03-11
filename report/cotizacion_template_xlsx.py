@@ -22,7 +22,7 @@ class CotizadorXlsx(models.AbstractModel):
 
             sheet.set_column('B:B', 40)
             sheet.set_column('C:C', 12)
-            sheet.set_column('C:C', 12)
+            sheet.set_column('D:D', 12)
 
             row = 1
             col = 1

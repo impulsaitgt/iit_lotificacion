@@ -46,7 +46,6 @@ class Cotizador(models.Model):
     @api.onchange('inmueble_id')
     def onchange_inmueble_id(self):
         self.precio = self.inmueble_id.precio_a_publico
-        self.enganche = self.inmueble_id.reserva
 
     @api.onchange('precio')
     def onchange_precio(self):

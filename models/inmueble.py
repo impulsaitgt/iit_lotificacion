@@ -7,7 +7,7 @@ class Inmueble(models.Model):
     direccion = fields.Char(string="Direccion")
     numero_de_escritura = fields.Char(string="Numero de escritura")
     precio_a_publico = fields.Float(string="Precio a publico",required=True, default=0)
-    precio_iva = fields.Float(string="Precio con IVA", required=True)
+    precio_iva = fields.Float(string="Precio con IVA", readonly=True, compute="_precio_iva_")
     precio_minimo = fields.Float(string="Precio Minimo (Sin IVA)",required=True, default=0)
     reserva = fields.Float(string="Reserva",required=True, default=0)
     frente = fields.Float(string="Frente (metros)", default=0)
@@ -26,9 +26,16 @@ class Inmueble(models.Model):
 
     @api.onchange('precio_a_publico')
     def onchange_precio_a_publico(self):
-        iva_id = self.env['account.tax'].search([("type_tax_use", "=", "sale")])
-        self.precio_iva = round(round(iva_id.amount / 100 * self.precio_a_publico, 2) + self.precio_a_publico, 2)
+        self._precio_iva_()
 
+
+    def _precio_iva_(self):
+        for inmueble in self:
+            if inmueble.precio_a_publico != 0:
+                iva_id = self.env['account.tax'].search([("type_tax_use", "=", "sale")])
+                inmueble.precio_iva = round(round(iva_id.amount / 100 * inmueble.precio_a_publico, 2) + inmueble.precio_a_publico, 2)
+            else:
+                inmueble.precio_iva = 0
 
     def action_view_cotizaciones(self):
         action = self.env.ref('iit_lotificacion.cotizador_action').read()[0]
