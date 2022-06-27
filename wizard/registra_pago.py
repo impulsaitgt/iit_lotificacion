@@ -63,6 +63,17 @@ class RegistraPagoWizard(models.TransientModel):
                         }
 
                         cargo.write(vals_cargo_pago)
+
+                        vals_linea = {
+                            'reconciled': True,
+                            'full_reconcile_id': full_reconcile.id,
+                            'matching_number': full_reconcile.name,
+                        }
+
+                        linec.write(vals_linea)
+
+                        line.write(vals_linea)
+
         return self
 
     def action_pagar(self):
