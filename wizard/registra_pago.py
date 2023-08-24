@@ -108,7 +108,11 @@ class RegistraPagoWizard(models.TransientModel):
                         'inmueble_id': cotizador_id.inmueble_id.id,
                         'journal_id': diario_intereses,
                         'payment_reference': cotizador_id.name,
-                        'invoice_line_ids': [(0, 0, {'product_id': producto_intereses, 'price_unit': self.cuota_id.intereses, 'tax_ids': taxes_intereses})]
+                        'invoice_line_ids': [(0, 0,
+                                              {'product_id': producto_intereses,
+                                               'name': 'PAGO DE INTERESES DE ' + cotizador_id.inmueble_id.name + '\nCUOTA PAGADA NO. '+ str(self.cuota_id.cuota) + '\nBOLETA NO. ' + self.boleta,                                                                                                                 ''
+                                               'price_unit': self.cuota_id.intereses,
+                                               'tax_ids': taxes_intereses})]
                     }
 
                     cargo_intereses = self.env['account.move'].create(vals_cargo_intereses)
