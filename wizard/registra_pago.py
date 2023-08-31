@@ -21,7 +21,7 @@ class RegistraPagoWizard(models.TransientModel):
         cotizador_id = self.env['lot.cotizador'].search([('id','=',self.env.context['active_id'])])
         if self.tipo_pago == '0':
             self.cuota_id = self.env['lot.cotizador.lines'].search([('cotizador_id','=',self.env.context['active_id']),
-                                                                   ('valor_pagado','=',0)],
+                                                                   ('pagada','=','No')],
                                                                    order='cuota')[0]
             self.monto = round(self.cuota_id.capital + self.cuota_id.intereses, 2)
 
@@ -83,69 +83,24 @@ class RegistraPagoWizard(models.TransientModel):
                 raise ValidationError('No se pueden registrar pagos a Cuotas si no se ha completado el pago del enganche')
             else:
                 self.cuota_id = self.env['lot.cotizador.lines'].search([('cotizador_id', '=', self.env.context['active_id']),
-                                                                        ('valor_pagado', '=', 0)],
+                                                                        ('pagada', '=', 'No')],
                                                                            order='cuota')[0]
-                if self.monto != round(self.cuota_id.capital + self.cuota_id.intereses,2):
-                    raise ValidationError('No se puede registrar un pago de cuota diferente a su valor ' + str(round(self.cuota_id.capital + self.cuota_id.intereses, 2)))
+
+                # if self.monto != round(self.cuota_id.capital + self.cuota_id.intereses,2):
+                #     raise ValidationError('No se puede registrar un pago de cuota diferente a su valor ' + str(round(self.cuota_id.capital + self.cuota_id.intereses, 2)))
+                if round(self.monto + self.mora, 2) <= 0:
+                        raise ValidationError('Debes asignar un valor de cuota o mora para poder proceder')
                 else:
-                    vals_cargo_capital = {
-                        'move_type': 'out_invoice',
-                        'state': 'draft',
-                        'partner_id': cotizador_id.cliente_id.id,
-                        'inmueble_id': cotizador_id.inmueble_id.id,
-                        'journal_id': diario_capital,
-                        'payment_reference': cotizador_id.name,
-                        'invoice_line_ids': [(0, 0, {'product_id': producto_capital, 'price_unit': self.cuota_id.capital})]
-                    }
-
-                    cargo_capital = self.env['account.move'].create(vals_cargo_capital)
-                    cargo_capital.action_post()
-
-                    vals_cargo_intereses = {
-                        'move_type': 'out_invoice',
-                        'state': 'draft',
-                        'partner_id': cotizador_id.cliente_id.id,
-                        'inmueble_id': cotizador_id.inmueble_id.id,
-                        'journal_id': diario_intereses,
-                        'payment_reference': cotizador_id.name,
-                        'invoice_line_ids': [(0, 0,
-                                              {'product_id': producto_intereses,
-                                               'name': 'PAGO DE INTERESES DE ' + cotizador_id.inmueble_id.name + '\nCUOTA PAGADA NO. '+ str(self.cuota_id.cuota) + '\nBOLETA NO. ' + self.boleta,                                                                                                                 ''
-                                               'price_unit': self.cuota_id.intereses,
-                                               'tax_ids': taxes_intereses})]
-                    }
-
-                    cargo_intereses = self.env['account.move'].create(vals_cargo_intereses)
-
-                    cargo_intereses.action_post()
-
                     vals_cuota = {
-                        'valor_pagado': round(self.monto, 2),
+                        'valor_pagado': round(self.monto, 2) + self.cuota_id.valor_pagado,
                         'cotizador_id': cotizador_id.id,
-                        'fecha_pago': self.fecha,
-                        'boleta': self.boleta,
-                        'cargo_capital_id': cargo_capital.id,
-                        'cargo_intereses_id': cargo_intereses.id
+                        'fecha_pago': self.fecha
                     }
 
-                    if self.mora > 0:
-                        vals_cargo_mora = {
-                            'move_type': 'out_invoice',
-                            'state': 'draft',
-                            'partner_id': cotizador_id.cliente_id.id,
-                            'inmueble_id': cotizador_id.inmueble_id.id,
-                            'journal_id': diario_mora,
-                            'payment_reference': cotizador_id.name,
-                            'invoice_line_ids': [(0, 0,
-                                                  {'product_id': producto_mora, 'price_unit': self.mora,
-                                                   'tax_ids': taxes_mora})]
-                            }
-
-                        cargo_mora = self.env['account.move'].create(vals_cargo_mora)
-
-                        cargo_mora.action_post()
-
-                        vals_cuota['cargo_mora_id'] = cargo_mora.id
+                    if self.cuota_id.boleta:
+                        vals_cuota['boleta'] = self.cuota_id.boleta + ' / ' + self.boleta
+                    else:
+                        vals_cuota['boleta'] = self.boleta
 
 
                     vals_pago = {
@@ -167,13 +122,127 @@ class RegistraPagoWizard(models.TransientModel):
 
                     full_reconcile = self.env['account.full.reconcile'].create(vals_fr)
 
-                    self.paga_cargo(cargo_capital, pago_cuota, full_reconcile)
-                    self.paga_cargo(cargo_intereses, pago_cuota, full_reconcile)
-                    if self.mora:
+                    if self.monto > 0:
+                        if self.monto > round(self.cuota_id.capital + self.cuota_id.intereses - self.cuota_id.valor_pagado, 2):
+                            raise ValidationError('No puedes pagar monto mayor al monto de la cuota menos el valor pagado')
+                        else:
+                            if self.monto > self.cuota_id.intereses - self.cuota_id.valor_pagado:
+                                if self.cuota_id.valor_pagado >= self.cuota_id.intereses:
+                                    capital_a_pagar = self.monto
+                                else:
+                                    capital_a_pagar = self.monto - (self.cuota_id.intereses - self.cuota_id.valor_pagado)
+                                vals_cargo_capital = {
+                                    'move_type': 'out_invoice',
+                                    'state': 'draft',
+                                    'partner_id': cotizador_id.cliente_id.id,
+                                    'inmueble_id': cotizador_id.inmueble_id.id,
+                                    'journal_id': diario_capital,
+                                    'payment_reference': cotizador_id.name,
+                                    'invoice_line_ids': [(0, 0, {'product_id': producto_capital, 'price_unit': capital_a_pagar})]
+                                }
+
+                                cargo_capital = self.env['account.move'].create(vals_cargo_capital)
+                                cargo_capital.action_post()
+                                if not self.cuota_id.cargo_capital_id:
+                                    vals_cuota['cargo_capital_id'] = cargo_capital.id
+                                else:
+                                    if not self.cuota_id.cargo_capital_id2:
+                                        vals_cuota['cargo_capital_id2'] = cargo_capital.id
+                                    else:
+                                        if not self.cuota_id.cargo_capital_id3:
+                                            vals_cuota['cargo_capital_id3'] = cargo_capital.id
+                                        else:
+                                            if not self.cuota_id.cargo_capital_id4:
+                                                vals_cuota['cargo_capital_id4'] = cargo_capital.id
+                                self.paga_cargo(cargo_capital, pago_cuota, full_reconcile)
+
+                            if self.cuota_id.intereses > self.cuota_id.valor_pagado:
+                                if self.monto > (self.cuota_id.intereses - self.cuota_id.valor_pagado):
+                                    intereses_a_pagar = self.cuota_id.intereses - self.cuota_id.valor_pagado
+                                else:
+                                    intereses_a_pagar = self.monto
+                                vals_cargo_intereses = {
+                                    'move_type': 'out_invoice',
+                                    'state': 'draft',
+                                    'partner_id': cotizador_id.cliente_id.id,
+                                    'inmueble_id': cotizador_id.inmueble_id.id,
+                                    'journal_id': diario_intereses,
+                                    'payment_reference': cotizador_id.name,
+                                    'invoice_line_ids': [(0, 0,
+                                                          {'product_id': producto_intereses,
+                                                           'name': 'PAGO DE INTERESES DE ' + cotizador_id.inmueble_id.name + '\nCUOTA PAGADA NO. '+ str(self.cuota_id.cuota) + '\nBOLETA NO. ' + self.boleta,
+                                                           'price_unit': intereses_a_pagar,
+                                                           'tax_ids': taxes_intereses})]
+                                }
+
+                                cargo_intereses = self.env['account.move'].create(vals_cargo_intereses)
+                                cargo_intereses.action_post()
+                                if not self.cuota_id.cargo_intereses_id:
+                                    vals_cuota['cargo_intereses_id'] = cargo_intereses.id
+                                else:
+                                    if not self.cuota_id.cargo_intereses_id2:
+                                        vals_cuota['cargo_intereses_id2'] = cargo_intereses.id
+                                    else:
+                                        if not self.cuota_id.cargo_intereses_id3:
+                                            vals_cuota['cargo_intereses_id3'] = cargo_intereses.id
+                                        else:
+                                            if not self.cuota_id.cargo_intereses_id4:
+                                                vals_cuota['cargo_intereses_id4'] = cargo_intereses.id
+                                self.paga_cargo(cargo_intereses, pago_cuota, full_reconcile)
+
+                    if self.mora > 0:
+                        vals_cargo_mora = {
+                            'move_type': 'out_invoice',
+                            'state': 'draft',
+                            'partner_id': cotizador_id.cliente_id.id,
+                            'inmueble_id': cotizador_id.inmueble_id.id,
+                            'journal_id': diario_mora,
+                            'payment_reference': cotizador_id.name,
+                            'invoice_line_ids': [(0, 0,
+                                                  {'product_id': producto_mora,
+                                                   'name': 'PAGO DE MORA DE ' + cotizador_id.inmueble_id.name + '\nCUOTA NO. ' + str(self.cuota_id.cuota) + '\nBOLETA NO. ' + self.boleta,
+                                                   'price_unit': self.mora,
+                                                   'tax_ids': taxes_mora})]
+                            }
+
+                        cargo_mora = self.env['account.move'].create(vals_cargo_mora)
+                        cargo_mora.action_post()
+                        if not self.cuota_id.cargo_mora_id:
+                            vals_cuota['cargo_mora_id'] = cargo_mora.id
+                        else:
+                            if not self.cuota_id.cargo_mora_id2:
+                                vals_cuota['cargo_mora_id2'] = cargo_mora.id
+                            else:
+                                if not self.cuota_id.cargo_capital_id3:
+                                    vals_cuota['cargo_mora_id3'] = cargo_mora.id
+                                else:
+                                    if not self.cuota_id.cargo_capital_id4:
+                                        vals_cuota['cargo_mora_id4'] = cargo_mora.id
                         self.paga_cargo(cargo_mora, pago_cuota, full_reconcile)
 
-                    vals_cuota['recibo_id'] = pago_cuota.id
+
+                    # self.paga_cargo(cargo_capital, pago_cuota, full_reconcile)
+                    # self.paga_cargo(cargo_intereses, pago_cuota, full_reconcile)
+                    # if self.mora:
+                    #     self.paga_cargo(cargo_mora, pago_cuota, full_reconcile)
+
+                    if not self.cuota_id.recibo_id:
+                        vals_cuota['recibo_id'] = pago_cuota.id
+                    else:
+                        if not self.cuota_id.recibo_id2:
+                            vals_cuota['recibo_id2'] = pago_cuota.id
+                        else:
+                            if not self.cuota_id.recibo_id3:
+                                vals_cuota['recibo_id3'] = pago_cuota.id
+                            else:
+                                if not self.cuota_id.recibo_id4:
+                                    vals_cuota['recibo_id4'] = pago_cuota.id
                     self.cuota_id.write(vals_cuota)
+                    if self.cuota_id.valor_pagado == self.cuota_id.capital + self.cuota_id.intereses:
+                        vals_cuota_pagada = {
+                            'pagada': 'Si'
+                        }
+                        self.cuota_id.write(vals_cuota_pagada)
 
 
         elif self.tipo_pago == '1':

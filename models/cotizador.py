@@ -31,6 +31,7 @@ class Cotizador(models.Model):
     cuota_final = fields.Float(string="Cuota Normal", readonly=True, default=0)
     state_payment = fields.Char(string="Estado de Pago", readonly=True)
 
+
     _sql_constraints = [
         ('referencia_unica', 'unique(name)', "Ese cotizador ya existe revisa la secuencia")
     ]
@@ -214,11 +215,24 @@ class CotizadorLines(models.Model):
     cuota = fields.Integer(string="Cuota", default=0)
     cuota_total = fields.Float(string="Cuota total", compute="_cuota_total_")
     valor_pagado = fields.Float(string="Valor Pagado", default=0)
+    pagada = fields.Char(string="Pagado", default="No")
     boleta = fields.Char(string='Boleta')
     cargo_capital_id = fields.Many2one(string="Cargo capital", comodel_name='account.move', readonly=True)
+    cargo_capital_id2 = fields.Many2one(string="Cargo capital 2", comodel_name='account.move', readonly=True)
+    cargo_capital_id3 = fields.Many2one(string="Cargo capital 3", comodel_name='account.move', readonly=True)
+    cargo_capital_id4 = fields.Many2one(string="Cargo capital 4", comodel_name='account.move', readonly=True)
     cargo_intereses_id = fields.Many2one(string="Factura Interes", comodel_name='account.move', readonly=True)
+    cargo_intereses_id2 = fields.Many2one(string="Factura Interes 2", comodel_name='account.move', readonly=True)
+    cargo_intereses_id3 = fields.Many2one(string="Factura Interes 3", comodel_name='account.move', readonly=True)
+    cargo_intereses_id4 = fields.Many2one(string="Factura Interes 4", comodel_name='account.move', readonly=True)
     cargo_mora_id = fields.Many2one(string="Factura Mora", comodel_name='account.move', readonly=True)
+    cargo_mora_id2 = fields.Many2one(string="Factura Mora 2", comodel_name='account.move', readonly=True)
+    cargo_mora_id3 = fields.Many2one(string="Factura Mora 3", comodel_name='account.move', readonly=True)
+    cargo_mora_id4 = fields.Many2one(string="Factura Mora 4", comodel_name='account.move', readonly=True)
     recibo_id = fields.Many2one(string="Recibo de Pago", comodel_name='account.payment', readonly=True)
+    recibo_id2 = fields.Many2one(string="Recibo de Pago 2", comodel_name='account.payment', readonly=True)
+    recibo_id3 = fields.Many2one(string="Recibo de Pago 3", comodel_name='account.payment', readonly=True)
+    recibo_id4 = fields.Many2one(string="Recibo de Pago 4", comodel_name='account.payment', readonly=True)
     estado = fields.Char(string="Estado", readonly=True, default='Normal')
 
     def _cuota_total_(self):
