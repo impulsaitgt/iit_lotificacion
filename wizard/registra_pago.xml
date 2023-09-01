@@ -11,6 +11,7 @@
                     <group>
                         <field name="tipo_pago"/>
                         <field name="monto"/>
+                        <field name="cuota_no"/>
                         <field name="fecha"/>
                     </group>
                     <group>

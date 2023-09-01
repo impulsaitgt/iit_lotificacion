@@ -14,6 +14,7 @@ class RegistraPagoWizard(models.TransientModel):
     journal_id = fields.Many2one(string="Diario", comodel_name='account.journal')
     cotizador_id = fields.Many2one(string="Cotizador", comodel_name='lot.cotizador')
     cuota_id = fields.Many2one(string="Cuota", comodel_name='lot.cotizador.lines')
+    cuota_no = fields.Char(string="Cuota No.", readonly=True)
     mora = fields.Float(string="Mora", default=0)
 
     @api.onchange('tipo_pago')
@@ -23,13 +24,16 @@ class RegistraPagoWizard(models.TransientModel):
             self.cuota_id = self.env['lot.cotizador.lines'].search([('cotizador_id','=',self.env.context['active_id']),
                                                                    ('pagada','=','No')],
                                                                    order='cuota')[0]
-            self.monto = round(self.cuota_id.capital + self.cuota_id.intereses, 2)
+            # self.monto = round(self.cuota_id.capital + self.cuota_id.intereses, 2)
+            self.cuota_no = self.cuota_id.cuota
+            self.monto = round(self.cuota_id.capital + self.cuota_id.intereses - self.cuota_id.valor_pagado, 2)
 
             if self.fecha > self.cuota_id.fecha:
                 mora = self.env['lot.mora'].search([('fecha_de_vigencia','<=', self.fecha)], order='fecha_de_vigencia desc')[0]
                 self.mora = round(mora.porcentaje_de_mora/100 * self.monto , 2)
 
         elif self.tipo_pago == '1':
+            self.cuota_no = "Enganche pendiente"
             self.monto = round(cotizador_id.enganche - cotizador_id.enganche_pagado, 2)
             self.mora = 0
 
