@@ -186,7 +186,7 @@ class Cotizador(models.Model):
             cotizador.suma_intereses = intereses
             cotizador.suma_cuotas = cuotas
             cotizador.valor_pagado = valor_pagado
-            if round(capital, 2) <= round(valor_pagado, 2):
+            if round(capital+intereses, 2) <= round(valor_pagado, 2):
                 state_payment = "Completamente Pagado"
 
             if cotizador.state == 'draft':
